@@ -101,4 +101,4 @@ df = pd.DataFrame([c.__dict__ for c in list_cand])
 df.to_csv("data.csv", sep=";", encoding="iso-8859-1")
 end = time.time()
 a = end - start
-print(f"{int(a//60)}:{int(a%60)}")
+print(f"{int(a//60):02d}:{int(a%60):02d}")
