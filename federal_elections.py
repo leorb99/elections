@@ -98,7 +98,7 @@ for sg in states:
                 c.set_patrimony(f"{v:.2f}")
 
 df = pd.DataFrame([c.__dict__ for c in list_cand])
-df.to_csv("data.csv", encoding="iso-8859-1")
+df.to_csv("data.csv", sep=";", encoding="iso-8859-1")
 end = time.time()
 a = end - start
 print(f"{int(a//60)}:{int(a%60)}")
