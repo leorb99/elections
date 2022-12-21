@@ -1,28 +1,32 @@
-import pandas as pd
+"""
+Data about federal elections
+"""
 import os
-from classes import Candidate
 import time
+import pandas as pd
+from classes import Candidate
+
 start = time.time()
 CONSULT = "/consulta_cand_2022/consulta_cand_2022_"
 ASSETS = "/bem_candidato_2022/bem_candidato_2022_"
 VOTING = "/votacao_candidato_munzona_2022/votacao_candidato_munzona_2022_"
 
-states = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", 
-          "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", 
+STATES = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO",
+          "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI",
           "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"]
 
 list_cand = []
-
-for sg in states:
+# pylint: disable=no-member
+for sg in STATES:
     votes_cand = {}
     patrimony_cand = {}
     sg_cand = []
 
-    candidates = pd.read_csv(os.getcwd() + 
+    candidates = pd.read_csv(os.getcwd() +
                             f"{CONSULT + sg}.csv",
                             sep=";", encoding="iso-8859-1")
 
-    cand_assets = pd.read_csv(os.getcwd() + 
+    cand_assets = pd.read_csv(os.getcwd() +
                             f"{ASSETS + sg}.csv",
                             sep=";", encoding="iso-8859-1")
 
@@ -38,7 +42,7 @@ for sg in states:
             age = candidates.at[i, "NR_IDADE_DATA_POSSE"]
             gender = candidates.at[i, "DS_GENERO"]
             color = candidates.at[i, "DS_COR_RACA"]
-            party = (candidates.at[i, "SG_PARTIDO"] + 
+            party = (candidates.at[i, "SG_PARTIDO"] +
             " - " + candidates.at[i, "NM_PARTIDO"])
             number = candidates.at[i, "NR_CANDIDATO"]
             marital_status = candidates.at[i, "DS_ESTADO_CIVIL"]
@@ -54,7 +58,7 @@ for sg in states:
             cand.set_age(age)
             cand.set_gender(gender)
             cand.set_color(color)
-            
+
             if (reelection == "S" and cand.get_status() == "ELEITO POR QP" or
                 cand.get_status() == "ELEITO POR MÉDIA"):
                 cand.set_reelected(True)
@@ -65,29 +69,29 @@ for sg in states:
             sg_cand.append(cand)
 
     # The votes and patrimony are in databases.
-    # To calculate the votes and the patrimony of each candidate,
-    # first we need to verify if the 'SQ_CANDIDATO' is a key of the dictionary
-    # and if the value of this key is 0. Then we need to search all the 
-    # 'SQ_CANDIDATO' with the same key and sum them. When the value of a key is
-    # different from 0, this value has already been calculated.
+    # To calculate the votes and the patrimony of each candidate, first we need
+    # to verify if the 'SQ_CANDIDATO' is a key of the dictionary and if the
+    # value of this key is 0. Then we need to search all the 'SQ_CANDIDATO'
+    # with the same key and sum them. When the value of a key is different from
+    # 0, this value has already been calculated.
     for i in range(len(cand_assets)):
-        if (cand_assets.at[i, "SQ_CANDIDATO"] in patrimony_cand.keys() 
+        if (cand_assets.at[i, "SQ_CANDIDATO"] in patrimony_cand
             and patrimony_cand[cand_assets.at[i, "SQ_CANDIDATO"]] == 0):
             for j in range(i, len(cand_assets)):
-                if cand_assets.at[j, "SQ_CANDIDATO"] in patrimony_cand.keys():
+                if cand_assets.at[j, "SQ_CANDIDATO"] in patrimony_cand:
                     patrimony = float(cand_assets.at[j, "VR_BEM_CANDIDATO"].replace(",", "."))
                     patrimony_cand[cand_assets.at[j, "SQ_CANDIDATO"]] += patrimony
             break
-        
+
     for i in range(len(cand_votes)):
-        if (cand_votes.at[i, "SQ_CANDIDATO"] in votes_cand.keys() 
+        if (cand_votes.at[i, "SQ_CANDIDATO"] in votes_cand
             and votes_cand[cand_votes.at[i, "SQ_CANDIDATO"]] == 0):
             for j in range(i, len(cand_votes)):
-                if cand_votes.at[j, "SQ_CANDIDATO"] in votes_cand.keys():
+                if cand_votes.at[j, "SQ_CANDIDATO"] in votes_cand:
                     votes = cand_votes.at[j, "QT_VOTOS_NOMINAIS_VALIDOS"]
                     votes_cand[cand_votes.at[j, "SQ_CANDIDATO"]] += votes
             break
-    
+
     # Sets the votes and patrimony for each candidate
     for c in sg_cand:
         for k, v in votes_cand.items():
